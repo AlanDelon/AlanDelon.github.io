@@ -1,0 +1,515 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>JSON常用类库介绍（二） | itsleuth</title>
+
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631250759899">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-132765152-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', 'UA-132765152-1');
+</script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            itsleuth
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1631250759899"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JSON常用类库介绍（二）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2019-03-20 ·
+                    </time>
+                    
+                        <a href="https://alandelon.github.io/tag/1gEkLlaQJO/" class="post-tags">
+                            # Java工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="一-gson的基本用法">一、Gson的基本用法</h2>
+<h4 id="pojo类与json转换">POJO类与JSON转换</h4>
+<pre><code>@Data
+public class Sku implements Serializable {
+    /** id 编号 */
+    private long skuId;
+    /** 图片地址 */
+    private String imgUrl;
+    /** 创建时间 */
+    private Date createTime;
+}
+</code></pre>
+<p>生成JSON</p>
+<pre><code>Sku sku = new Sku();
+sku.setSkuId(20190317001L);
+sku.setImgUrl(&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;);
+sku.setCreateTime(new Date());
+
+Gson gson = new Gson();
+String json = gson.toJson(sku);
+// {&quot;skuId&quot;:20190317001,&quot;imgUrl&quot;:&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;,&quot;createTime&quot;:&quot;Mar 17, 2019 11:23:20 AM&quot;}
+</code></pre>
+<p>解析JSON：</p>
+<pre><code>Gson gson = new Gson();
+String jsonString = &quot;{\&quot;skuId\&quot;:20190317001,\&quot;imgUrl\&quot;:\&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg\&quot;,\&quot;createTime\&quot;:\&quot;Mar 17, 2019 11:23:20 AM\&quot;}&quot;;
+Sku skuFromJson = gson.fromJson(jsonString, Sku.class);
+</code></pre>
+<h4 id="属性重命名-serializedname">属性重命名 @SerializedName</h4>
+<p>接收数据时期望json格式：</p>
+<pre><code>{&quot;skuId&quot;:20190317001,&quot;imgUrl&quot;:&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;}
+</code></pre>
+<p>实际json格式：</p>
+<pre><code>{&quot;skuId&quot;:20190317001,&quot;img_url&quot;:&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;}
+</code></pre>
+<p>前台和后台（团队之间）数据命名格式不统一，java后台采用驼峰方法命名，前台js可能钟情于下划线方式命名；团队之间对于同一个字段的命名方式不同。这种情况下双方不肯妥协或是历史遗留问题，怎么办？<br>
+使用@SerializedName注解对属性重命名：</p>
+<pre><code>/** 图片地址 */
+@SerializedName(&quot;img_url&quot;)
+private String imgUrl;
+</code></pre>
+<p>上面的问题解决了<br>
+但是由于设计不严谨，又有团队发来以下格式的json，怎么办？</p>
+<pre><code>{&quot;skuId&quot;:20190317001,&quot;img&quot;:&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;}
+{&quot;skuId&quot;:20190317001,&quot;imgUrl&quot;:&quot;//img12.360buyimg.com/45ab3dd6c35d981b.jpg&quot;}
+</code></pre>
+<p>我们可以为POJO字段提供备选属性名<br>
+SerializedName注解提供了两个属性，上面用到了一个，还有一个属性alternate，接收一个String数组。</p>
+<pre><code>@SerializedName(value = &quot;imgUrl&quot;, alternate = {&quot;img&quot;, &quot;img_url&quot;})
+private String imgUrl;
+</code></pre>
+<h2 id="二-gson泛型支持">二、Gson泛型支持</h2>
+<p>解析Sku对象数组json串，如下：</p>
+<pre><code>[{&quot;skuId&quot;:1,&quot;imgUrl&quot;:&quot;//img.com/1.jpg&quot;},{&quot;skuId&quot;:2,&quot;imgUrl&quot;:&quot;//img.com/2.jpg&quot;}]
+</code></pre>
+<p>Gson提供了TypeToken来实现对泛型的支持，所以当我们希望使用将以上的数据解析为List<Sku>时需要这样写。</p>
+<pre><code>Gson gson = new Gson();
+String skuListJson = &quot;[{\&quot;skuId\&quot;:1,\&quot;imgUrl\&quot;:\&quot;//img.com/1.jpg\&quot;},{\&quot;skuId\&quot;:2,\&quot;imgUrl\&quot;:\&quot;//img.com/2.jpg\&quot;}]&quot;;
+List&lt;Sku&gt; resultSkuList = gson.fromJson(skuListJson, new TypeToken&lt;List&lt;Sku&gt;&gt;(){}.getType());
+</code></pre>
+<p>注：TypeToken的构造方法是protected修饰的,所以上面才会写成new TypeToken&lt;List<String>&gt;() {}.getType() 而不是  new TypeToken&lt;List<String>&gt;().getType()</p>
+<h2 id="三-gsonbuilder介绍">三、GsonBuilder介绍</h2>
+<p>一般情况下Gson类提供的 API已经能满足大部分的使用场景，但我们需要更特殊、更强大的功能时，这时候就引入一个新的类 GsonBuilder。</p>
+<p>GsonBuilder是用于构建Gson实例的一个类，要想改变Gson默认的设置必须使用该类配置Gson。</p>
+<h4 id="基本用法">基本用法</h4>
+<pre><code>Gson gson = new GsonBuilder()
+                // 各种配置
+                .create(); //生成配置好的Gson
+</code></pre>
+<p>Gson在默认情况下是不动导出值null的键的，如：</p>
+<pre><code>@Data
+public class Sku implements Serializable {
+    /** id 编号 */
+    private long skuId;
+    /** 图片地址 */
+    private String imgUrl;
+    /** 创建时间 */
+    private Date createTime;
+}
+
+@Test
+public void testToJson() {
+	Sku sku = new Sku();
+	sku.setSkuId(20190317001L);
+	sku.setCreateTime(new Date());
+	Gson gson = new Gson();
+	String json = gson.toJson(sku);
+	log.info(json); // {&quot;skuId&quot;:20190317001,&quot;createTime&quot;:&quot;Mar 17, 2019 1:11:33 PM&quot;}
+}
+</code></pre>
+<p>可以看出，imgUrl字段在json串中没有出现，如果接口要求没有值必须用null代替时，怎么处理？<br>
+如下：</p>
+<pre><code>@Test
+public void testToJson() {
+	Sku sku = new Sku();
+	sku.setSkuId(20190317001L);
+	sku.setCreateTime(new Date());
+	Gson gson = new GsonBuilder()
+			// 序列化空值
+			.serializeNulls()
+			.create();
+	String json = gson.toJson(sku);
+	log.info(json); // {&quot;skuId&quot;:20190317001,&quot;imgUrl&quot;:null,&quot;createTime&quot;:&quot;Mar 17, 2019 1:15:06 PM&quot;}
+}
+</code></pre>
+<h4 id="pojo与json的字段映射规则">POJO与JSON的字段映射规则:</h4>
+<p>GsonBuilder.setFieldNamingPolicy 方法与Gson提供枚举类FieldNamingPolicy配合使用，该枚举类提供了5种实现方式分别为：</p>
+<table>
+<thead>
+<tr>
+<th>FieldNamingPolicy</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IDENTITY</td>
+<td>{&quot;skuId&quot;:20190317001,&quot;createTime&quot;:&quot;2019-03-17&quot;}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_DASHES</td>
+<td>{&quot;sku-id&quot;:20190317001,&quot;create-time&quot;:&quot;2019-03-17&quot;}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_UNDERSCORES</td>
+<td>{&quot;sku_id&quot;:20190317001,&quot;create_time&quot;:&quot;2019-03-17&quot;}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE</td>
+<td>{&quot;SkuId&quot;:20190317001,&quot;CreateTime&quot;:&quot;2019-03-17&quot;}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE_WITH_SPACES</td>
+<td>{&quot;Sku Id&quot;:20190317001,&quot;Create Time&quot;:&quot;2019-03-17&quot;}</td>
+</tr>
+</tbody>
+</table>
+<pre><code>Gson gson = new GsonBuilder()
+		.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+		.create();
+</code></pre>
+<p>自定义映射规则：</p>
+<pre><code>Gson gson = new GsonBuilder()
+        .setFieldNamingStrategy(new FieldNamingStrategy() {
+            @Override
+            public String translateName(Field f) {
+                // 实现自己的规则，规则定义可参照FieldNamingPolicy枚举类书写
+                return null;
+            }
+        })
+        .create();
+</code></pre>
+<h4 id="格式化输出-日期时间及其它">格式化输出、日期时间及其它：</h4>
+<pre><code>Gson gson = new GsonBuilder()
+        // 序列化null
+        .serializeNulls()
+        // 设置日期时间格式，另有2个重载方法
+        // 在序列化和反序化时均生效
+        .setDateFormat(&quot;yyyy-MM-dd&quot;)
+        // 禁此序列化内部类
+        .disableInnerClassSerialization()
+        // 生成不可执行的Json（多了 )]}' 这4个字符）
+        .generateNonExecutableJson()
+        // 禁止转义html标签
+        .disableHtmlEscaping()
+        // 格式化输出
+        .setPrettyPrinting()
+        .create();
+</code></pre>
+<h2 id="四-过滤字段的几种方式">四、过滤字段的几种方式</h2>
+<h4 id="基于expose注解">基于@Expose注解</h4>
+<p>@Expose 注解从名字上就可以看出是暴露的意思，所以该注解是用于对外暴露字段的。该注解必须和GsonBuilder配合使用，默认通过new Gson()的方式该注解不生效。</p>
+<p>@Expose提供了两个属性，且都有默认值，开发者可以根据需要设置不同的值。</p>
+<pre><code>@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface Expose {
+    boolean serialize() default true;
+
+    boolean deserialize() default true;
+}
+</code></pre>
+<p><strong>使用方法</strong>： 简单说来就是需要导出的字段上加上**@Expose <strong>注解，不导出的字段不加。注意是</strong>不导出的不加**。</p>
+<pre><code>@Expose // 默认序列化反序列化都生效
+@Expose(deserialize = true,serialize = true) // 序列化和反序列化都都生效，等价于上一条
+@Expose(deserialize = true,serialize = false) // 反序列化时生效
+@Expose(deserialize = false,serialize = true) // 序列化时生效
+@Expose(deserialize = false,serialize = false) // 和不写注解一样
+
+Gson gson = new GsonBuilder()
+        .excludeFieldsWithoutExposeAnnotation()
+        .create();
+</code></pre>
+<h4 id="基于版本">基于版本</h4>
+<p>Gson在对基于版本的字段导出提供了两个注解 <strong>@Since</strong>  和 <strong>@Until</strong>，和 <strong>GsonBuilder.setVersion(Double)</strong> 配合使用。@Since 和 @Until都接收一个Double值。</p>
+<p><strong>使用方法</strong>：当前版本(GsonBuilder中设置的版本) 大于等于Since的值时该字段导出，小于Until的值时该该字段导出。</p>
+<pre><code>class SinceUntilSample {
+    @Since(4)
+    public String since;
+    @Until(5)
+    public String until;
+}
+
+public void sineUtilTest(double version){
+        SinceUntilSample sinceUntilSample = new SinceUntilSample();
+        sinceUntilSample.since = &quot;since&quot;;
+        sinceUntilSample.until = &quot;until&quot;;
+        Gson gson = new GsonBuilder().setVersion(version).create();
+        System.out.println(gson.toJson(sinceUntilSample));
+}
+// 当version &lt;4时，结果：{&quot;until&quot;:&quot;until&quot;}
+// 当version &gt;=4 &amp;&amp; version &lt;5时，结果：{&quot;since&quot;:&quot;since&quot;,&quot;until&quot;:&quot;until&quot;}
+// 当version &gt;=5时，结果：{&quot;since&quot;:&quot;since&quot;}
+</code></pre>
+<p><strong>注：当一个字段被同时注解时，需两者同时满足条件。</strong></p>
+<h4 id="基于访问修饰符">基于访问修饰符</h4>
+<p>什么是修饰符? public、static 、final、private、protected 这些就是，使用方式：</p>
+<pre><code>class ModifierSample {
+    final String finalField = &quot;final&quot;;
+    static String staticField = &quot;static&quot;;
+    public String publicField = &quot;public&quot;;
+    protected String protectedField = &quot;protected&quot;;
+    String defaultField = &quot;default&quot;;
+    private String privateField = &quot;private&quot;;
+}
+
+ModifierSample modifierSample = new ModifierSample();
+Gson gson = new GsonBuilder()
+        .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.STATIC, Modifier.PRIVATE)
+        .create();
+log.info(gson.toJson(modifierSample)); 
+// {&quot;publicField&quot;:&quot;public&quot;,&quot;protectedField&quot;:&quot;protected&quot;,&quot;defaultField&quot;:&quot;default&quot;}
+</code></pre>
+<h4 id="基于策略自定义规则">基于策略（自定义规则）</h4>
+<p>基于策略是利用Gson提供的ExclusionStrategy接口，同样需要使用GsonBuilder,相关API 2个，分别是addSerializationExclusionStrategy 和addDeserializationExclusionStrategy 分别针对序列化和反序化时。这里以序列化为例。</p>
+<pre><code>Gson gson = new GsonBuilder()
+        .addSerializationExclusionStrategy(new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes f) {
+                // 按属性名排除
+                if (&quot;skuId&quot;.equals(f.getName())){
+                    return true;
+                }
+                Expose expose = f.getAnnotation(Expose.class);
+                // 按注解排除
+                if (expose != null &amp;&amp; !expose.deserialize()){
+                    return true;
+                } 
+                return false;
+            }
+            @Override
+            public boolean shouldSkipClass(Class&lt;?&gt; clazz) {
+                // 直接排除某个类 ，return true为排除
+                return (clazz == int.class || clazz == Integer.class);
+            }
+        })
+        .create();
+</code></pre>
+<p>是不是很强大，想怎么排除就怎么排除。</p>
+<h2 id="五-typeadapter">五、TypeAdapter</h2>
+<p>TypeAdapter 是Gson提供的一个抽象类，用于接管某种类型的序列化和反序列化过程，包含两个注要方法 write(JsonWriter,T) 和 read(JsonReader) 。</p>
+<pre><code>/**
+ * @author jiangjian
+ * @date 2019/3/17 14:40
+ */
+public class SkuAdapter extends TypeAdapter&lt;Sku&gt; {
+    @Override
+    public void write(JsonWriter jsonWriter, Sku sku) throws IOException {
+        jsonWriter.beginObject();
+        jsonWriter.name(&quot;SKU编码&quot;).value(sku.getSkuId());
+        jsonWriter.name(&quot;图片地址&quot;).value(sku.getImgUrl());
+        jsonWriter.name(&quot;创建时间&quot;).value(DateFormatUtils.format(sku.getCreateTime(), &quot;yyyy-MM-dd&quot;));
+        jsonWriter.endObject();
+    }
+
+    @Override
+    public Sku read(JsonReader jsonReader) throws IOException {
+        Sku sku = new Sku();
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            switch (jsonReader.nextName()) {
+                case &quot;skuId&quot;:
+                    sku.setSkuId(jsonReader.nextLong());
+                    break;
+                case &quot;img&quot;:
+                case &quot;img_url&quot;:
+                case &quot;imgUrl&quot;:
+                    sku.setImgUrl(jsonReader.nextString());
+                    break;
+                case &quot;createTime&quot;:
+                    try {
+                        sku.setCreateTime(DateUtils.parseDate(jsonReader.nextString(),&quot;yyyy-MM-dd&quot;));
+                    } catch (ParseException e) {
+                        sku.setCreateTime(null);
+                    }
+                    break;
+                default:
+            }
+        }
+        jsonReader.endObject();
+        return sku;
+    }
+}
+
+@Data
+@JsonAdapter(SkuAdapter.class)
+public class Sku implements Serializable {
+    /** id 编号 */
+    private long skuId;
+
+    /** 图片地址 */
+    @Expose
+    private String imgUrl;
+
+    /** 创建时间 */
+    private Date createTime;
+}
+
+@Test
+public void testToJson() {
+	Sku sku = new Sku();
+	sku.setSkuId(20190317001L);
+	sku.setImgUrl(&quot;//img.com/xx.jpg&quot;);
+	sku.setCreateTime(new Date());
+	Gson gson = new Gson();
+	String json = gson.toJson(sku);
+	log.info(json); // {&quot;SKU编码&quot;:20190317001,&quot;图片地址&quot;:&quot;//img.com/xx.jpg&quot;,&quot;创建时间&quot;:&quot;2019-03-17&quot;}
+}
+</code></pre>
+<p>当我们为Sku.class 注册了 TypeAdapter之后，只要是操作Sku.class，那些之前介绍的@SerializedName 、FieldNamingStrategy、Since、Until、Expos通通都黯然失色，失去了效果，只会调用我们实现的SkuTypeAdapter.write(JsonWriter, User) 方法，我想怎么写就怎么写。</p>
+<p>Gson API Javadoc: http://www.javadoc.io/doc/com.google.code.gson/gson/2.8.5</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://alandelon.github.io/post/javatool-003-json/" class="post-title gt-a-link">
+                    JSON常用类库介绍（一）
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        京ICP备16061303号
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

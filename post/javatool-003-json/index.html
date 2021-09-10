@@ -1,0 +1,549 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>JSON常用类库介绍（一） | itsleuth</title>
+
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631250759899">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-132765152-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', 'UA-132765152-1');
+</script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            itsleuth
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1631250759899"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JSON常用类库介绍（一）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2019-03-13 ·
+                    </time>
+                    
+                        <a href="https://alandelon.github.io/tag/1gEkLlaQJO/" class="post-tags">
+                            # Java工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="一-json是什么">一、JSON是什么</h2>
+<p>JSON是一种文本方式展示结构化数据的方式，从产生开始就由于其简单好用、跨平台，特别适合HTTP下数据的传输（例如现在很流行的REST）而被广泛使用。</p>
+<h4 id="结构与类型">结构与类型</h4>
+<ul>
+<li>两种结构：对象内的键值对集合结构和数组，对象用{}表示、内部是”key”:”value”，数组用[]表示，不同值用逗号分开</li>
+<li>基本数值有7个： true / false / null  / object / array / number / string</li>
+<li>结构可以嵌套，进而可以用来表达复杂的数据</li>
+</ul>
+<h4 id="优点">优点</h4>
+<ul>
+<li>基于纯文本，所以对于人类阅读是很友好的。</li>
+<li>规范简单，所以容易处理，开箱即用，特别是JS类的ECMA脚本里是内建支持的，可以直接作为对象使用。</li>
+<li>平台无关性，因为类型和结构都是平台无关的，而且好处理，容易实现不同语言的处理类库，可以作为多个不同异构系统之间的数据传输格式协议，特别是在HTTP/REST下的数据格式。</li>
+</ul>
+<h4 id="缺点">缺点</h4>
+<ul>
+<li>性能一般，文本表示的数据一般来说比二进制大得多，在数据传输上和解析处理上都要更影响性能。</li>
+<li>缺乏schema，跟同是文本数据格式的XML比，在类型的严格性和丰富性上要差很多。</li>
+</ul>
+<h4 id="google-json风格指南">Google JSON风格指南</h4>
+<p>遵循好的设计与编码风格，能提前解决80%的问题:</p>
+<ul>
+<li>英文版Google JSON Style Guide：https://google.github.io/styleguide/jsoncstyleguide.xml</li>
+<li>中文版Google JSON风格指南：https://github.com/darcyliu/google-styleguide/blob/master/JSONStyleGuide.md</li>
+</ul>
+<h2 id="二-常用json库">二、常用JSON库</h2>
+<h4 id="gson">Gson</h4>
+<p>项目地址：https://github.com/google/gson</p>
+<p>Gson是目前功能最全的Json解析神器，Gson当初是为因应Google公司内部需求而由Google自行研发而来，但自从在2008年五月公开发布第一版后已被许多公司或用户应用。 Gson的应用主要为toJson与fromJson两个转换函数，无依赖，不需要额外的jar，能够直接跑在JDK上。 类里面只要有get和set方法，Gson完全可以实现复杂类型的json到bean或bean到json的转换，是JSON解析的神器。</p>
+<h4 id="fastjson">FastJson</h4>
+<p>项目地址：https://github.com/alibaba/fastjson</p>
+<p>Fastjson是一个Java语言编写的高性能的JSON处理器，由阿里巴巴公司开发。无依赖，不需要额外的jar，能够直接跑在JDK上。 FastJson在复杂类型的Bean转换Json上会出现一些问题，可能会出现引用的类型，导致Json转换出错（可通过禁止循环引用避免）。 FastJson采用独创的算法，将parse的速度提升到极致，超过所有json库。</p>
+<h4 id="jackson">Jackson</h4>
+<p>项目地址：https://github.com/FasterXML/jackson</p>
+<p>Jackson是当前用的比较广泛的，用来序列化和反序列化json的Java开源框架。Jackson社区比较活跃，更新速度也比较快， 从Github中的统计来看，Jackson是最流行的json解析器之一，Spring MVC的默认json解析器便是Jackson。Jackson 所依赖的jar包较少，简单易用，解析大的 json 文件速度比较快。</p>
+<h4 id="json-lib">Json-lib</h4>
+<p>项目地址：http://json-lib.sourceforge.net/index.html</p>
+<p>json-lib是最早的也是应用广泛的json解析工具，json-lib 不好的地方是依赖于很多第三方包，对于复杂类型的转换，json-lib对于json转换成bean还有缺陷， 比如一个类里面会出现另一个类的list或者map集合，json-lib从json到bean的转换就会出现问题。json-lib在功能和性能上面都不能满足现在互联网化的需求。</p>
+<p>序列化性能对比：<br>
+<img src="https://itsleuth.cn/upload/2019/2/120190326195953681.png" alt="" loading="lazy"></p>
+<p>反序列化性能对比：<br>
+<img src="https://itsleuth.cn/upload/2019/2/220190326195734367.png" alt="" loading="lazy"></p>
+<p>从上面的测试结果对比可以看出来，Fastjson速度是真的牛，没有对手。Gson在序列化次数较少时性能还不错，次数多了以后相比Fastjson、Jackson速度稍微慢些，Jackson一直表现优异，至于Json-lib大家自己看吧。</p>
+<h2 id="三-fastjson-api">三、Fastjson API</h2>
+<h4 id="pojo与json转换">POJO与JSON转换</h4>
+<pre><code>@Data
+public class Sku implements Serializable {
+    /** id 编号 */
+    private long skuId;
+    /** 图片地址 */
+    private String imgUrl;
+    /** 创建时间 */
+    private Date createTime;
+}
+</code></pre>
+<p>POJO序列化生成JSON:</p>
+<pre><code>@Test
+public void testToJson() {
+	Sku sku = new Sku();
+	sku.setSkuId(20190324001L);
+	sku.setImgUrl(&quot;//img.com/fastjson.jpg&quot;);
+	sku.setCreateTime(new Date());
+	
+	String json = JSON.toJSONString(sku);
+	// {&quot;createTime&quot;:1553571270775,&quot;imgUrl&quot;:&quot;//img.com/fastjson.jpg&quot;,&quot;skuId&quot;:20190324001}
+}
+</code></pre>
+<p>JSON反序列化生成POJO:</p>
+<pre><code>@Test
+public void testFromJson() {
+	String jsonStr = &quot;{\&quot;createTime\&quot;:1553571270775,\&quot;imgUrl\&quot;:\&quot;//img.com/fastjson.jpg\&quot;,\&quot;skuId\&quot;:20190324001}&quot;;
+	Sku sku = JSON.parseObject(jsonStr, Sku.class);
+}
+</code></pre>
+<h4 id="jsonobject-jsonarray与json转换">JSONObject、JSONArray与JSON转换</h4>
+<pre><code class="language-java">String jsonStr = &quot;{\&quot;createTime\&quot;:1553571270775,\&quot;imgUrl\&quot;:\&quot;//img.com/fastjson.jpg\&quot;,\&quot;skuId\&quot;:20190324001}&quot;;
+JSONObject jsonObject = JSON.parseObject(jsonStr);
+jsonObject.getLong(&quot;skuId&quot;);
+jsonObject.getString(&quot;imgUrl&quot;);
+jsonObject.getDate(&quot;createTime&quot;);
+...
+
+
+String skuListJson = &quot;[{\&quot;skuId\&quot;:1,\&quot;imgUrl\&quot;:\&quot;//img.com/1.jpg\&quot;},{\&quot;skuId\&quot;:2,\&quot;imgUrl\&quot;:\&quot;//img.com/2.jpg\&quot;}]&quot;;
+JSONArray jsonArray = JSON.parseArray(skuListJson);
+for (Object obj : jsonArray) {
+	JSONObject jsonObject = (JSONObject) obj;
+	jsonObject.getLong(&quot;skuId&quot;);
+	...
+}
+</code></pre>
+<h4 id="泛型反序列化">泛型反序列化</h4>
+<pre><code>@Test
+public void testTypeReference() {
+	String skuListJson = &quot;[{\&quot;skuId\&quot;:1,\&quot;imgUrl\&quot;:\&quot;//img.com/1.jpg\&quot;},{\&quot;skuId\&quot;:2,\&quot;imgUrl\&quot;:\&quot;//img.com/2.jpg\&quot;}]&quot;;
+	List&lt;Sku&gt; skuList = JSON.parseObject(skuListJson, new TypeReference&lt;List&lt;Sku&gt;&gt;(){});
+	log.info(skuList.get(0).getImgUrl());
+}
+</code></pre>
+<h4 id="处理日期">处理日期</h4>
+<p>指定日期输出格式：</p>
+<pre><code>JSON.toJSONStringWithDateFormat(sku, &quot;yyyy-MM-dd HH:mm:ss&quot;);
+// {&quot;createTime&quot;:&quot;2019-03-27 15:09:25&quot;,&quot;imgUrl&quot;:&quot;//img.com/fastjson.jpg&quot;,&quot;skuId&quot;:20190324001} 
+</code></pre>
+<p>使用ISO-8601日期格式：</p>
+<pre><code>JSON.toJSONString(sku, SerializerFeature.UseISO8601DateFormat);
+// {&quot;createTime&quot;:&quot;2019-03-27T15:10:39.298+08:00&quot;,&quot;imgUrl&quot;:&quot;//img.com/fastjson.jpg&quot;,&quot;skuId&quot;:20190324001}
+</code></pre>
+<p>全局修改日期格式：</p>
+<pre><code>JSON.DEFFAULT_DATE_FORMAT = &quot;yyyy-MM-dd&quot;;
+JSON.toJSONString(sku, SerializerFeature.WriteDateUseDateFormat);
+// {&quot;createTime&quot;:&quot;2019-03-27&quot;,&quot;imgUrl&quot;:&quot;//img.com/fastjson.jpg&quot;,&quot;skuId&quot;:20190324001} 
+</code></pre>
+<p>反序列化能够自动识别常见日期格式：</p>
+<pre><code class="language-java">ISO-8601日期格式
+yyyy-MM-dd
+yyyy-MM-dd HH:mm:ss
+yyyy-MM-dd HH:mm:ss.SSS
+毫秒数字
+毫秒数字字符串
+</code></pre>
+<h4 id="定制序列化">定制序列化</h4>
+<h5 id="serializerfeature对json格式定制">SerializerFeature对Json格式定制</h5>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">QuoteFieldNames</td>
+<td style="text-align:left">输出key时是否使用双引号,默认为true</td>
+</tr>
+<tr>
+<td style="text-align:left">UseSingleQuotes</td>
+<td style="text-align:left">使用单引号而不是双引号,默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteMapNullValue</td>
+<td style="text-align:left">是否输出值为null的字段,默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteEnumUsingToString</td>
+<td style="text-align:left">Enum输出name()或者original,默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">UseISO8601DateFormat</td>
+<td style="text-align:left">Date使用ISO8601格式输出，默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteNullListAsEmpty</td>
+<td style="text-align:left">List字段如果为null,输出为[],而非null</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteNullStringAsEmpty</td>
+<td style="text-align:left">字符类型字段如果为null,输出为”“,而非null</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteNullNumberAsZero</td>
+<td style="text-align:left">数值字段如果为null,输出为0,而非null</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteNullBooleanAsFalse</td>
+<td style="text-align:left">Boolean字段如果为null,输出为false,而非null</td>
+</tr>
+<tr>
+<td style="text-align:left">SkipTransientField</td>
+<td style="text-align:left">如果是true，类中的Get方法对应的Field是transient，序列化时将会被忽略。默认为true</td>
+</tr>
+<tr>
+<td style="text-align:left">SortField</td>
+<td style="text-align:left">按字段名称排序后输出。默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteTabAsSpecial</td>
+<td style="text-align:left">把\t做转义输出，默认为false不推荐设为true</td>
+</tr>
+<tr>
+<td style="text-align:left">PrettyFormat</td>
+<td style="text-align:left">结果是否格式化,默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteClassName</td>
+<td style="text-align:left">序列化时写入类型信息，默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">DisableCircularReferenceDetect</td>
+<td style="text-align:left">消除对同一对象循环引用的问题，默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteSlashAsSpecial</td>
+<td style="text-align:left">对斜杠’/’进行转义</td>
+</tr>
+<tr>
+<td style="text-align:left">BrowserCompatible</td>
+<td style="text-align:left">将中文都会序列化为\uXXXX格式，字节数会多一些，但是能兼容IE 6，默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">WriteDateUseDateFormat</td>
+<td style="text-align:left">全局修改日期格式,默认为false。</td>
+</tr>
+<tr>
+<td style="text-align:left">DisableCheckSpecialChar</td>
+<td style="text-align:left">一个对象的字符串属性中如果有特殊字符如双引号，将会在转成json时带有反斜杠转移符。如果不需要转义，可以使用这个属性。默认为false</td>
+</tr>
+<tr>
+<td style="text-align:left">BeanToArray</td>
+<td style="text-align:left">将对象转为array输出</td>
+</tr>
+</tbody>
+</table>
+<h5 id="jsonfield注解配置">JSONField注解配置</h5>
+<ul>
+<li>ordinal() 配置序列化和反序列化的顺序（默认按字母顺序序列化）；</li>
+<li>name() 指定字段序列化的名称；</li>
+<li>format() 指定日期格式；</li>
+<li>serialize() deserialize() 是否序列化和反序列化，默认true；</li>
+<li>label() 打标记，可定制化输出</li>
+</ul>
+<pre><code>JSON.toJSONString(sku, Labels.includes(&quot;include&quot;));
+JSON.toJSONString(sku, Labels.excludes(&quot;exclude&quot;));
+</code></pre>
+<ul>
+<li>jsonDirect() 直接输出而不经过转译（对于存放json数据的string不做转义处理）</li>
+<li>serializeUsing() deserializeUsing() 指定序列化、反序列化使用自定义Serialize、Parser</li>
+</ul>
+<pre><code>public static class Model {
+    @JSONField(serializeUsing = ModelValueSerializer.class)
+    public int value;
+}
+
+public static class ModelValueSerializer implements ObjectSerializer {
+    @Override
+    public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType,
+                      int features) throws IOException {
+        Integer value = (Integer) object;
+        String text = value + &quot;元&quot;;
+        serializer.write(text);
+    }
+}
+
+Model model = new Model();
+model.value = 100;
+String json = JSON.toJSONString(model);    // {&quot;value&quot;:&quot;100元&quot;} 
+</code></pre>
+<ul>
+<li>alternateNames() 别名，允许多个名字的变量转成同一个属性</li>
+<li>unwrapped() 不封箱</li>
+</ul>
+<h5 id="jsontype注解">JSONType注解</h5>
+<p>JSONType和JSONField类似，但JSONType配置在类上，而不是field或者getter/setter方法上。不再详细介绍了。</p>
+<h5 id="serializefilter">SerializeFilter</h5>
+<p>SerializeFilter是通过编程扩展的方式定制序列化。fastjson支持多种SerializeFilter，用于不同场景的定制序列化。</p>
+<ul>
+<li>PropertyFilter 根据PropertyName和PropertyValue来判断是否序列化</li>
+<li>PropertyPreFilter 根据PropertyName判断是否序列化</li>
+<li>NameFilter 修改Key，如果需要修改Key,process返回值则可</li>
+<li>ValueFilter 修改Value</li>
+<li>BeforeFilter 序列化时在最前添加内容</li>
+<li>AfterFilter 序列化时在最后添加内容</li>
+</ul>
+<p><strong>1. PropertyFilter 根据PropertyName和PropertyValue来判断是否序列化</strong><br>
+可以通过扩展实现根据object或者属性名称或者属性值进行判断是否需要序列化</p>
+<pre><code> public interface PropertyFilter extends SerializeFilter {
+    boolean apply(Object object, String propertyName, Object propertyValue);
+ }
+</code></pre>
+<p><strong>2. PropertyPreFilter 根据PropertyName判断是否序列化</strong></p>
+<pre><code>public interface PropertyPreFilter extends SerializeFilter {
+    boolean apply(JSONSerializer serializer, Object object, String name);
+}
+</code></pre>
+<p><strong>3. NameFilter 序列化时修改Key</strong><br>
+如果需要修改Key,process返回值则可</p>
+<pre><code>public interface NameFilter extends SerializeFilter {
+    String process(Object object, String propertyName, Object propertyValue);
+}
+</code></pre>
+<p>fastjson内置一个PascalNameFilter，用于输出将首字符大写的Pascal风格。 例如：</p>
+<pre><code>import com.alibaba.fastjson.serializer.PascalNameFilter;
+
+Object obj = ...;
+String jsonStr = JSON.toJSONString(obj, new PascalNameFilter());
+</code></pre>
+<p><strong>4. ValueFilter 序列化时修改Value</strong></p>
+<pre><code>public interface ValueFilter extends SerializeFilter {
+  Object process(Object object, String propertyName, Object propertyValue);
+}
+</code></pre>
+<p><strong>5. BeforeFilter 序列化时在最前添加内容</strong><br>
+在序列化对象的所有属性之前执行某些操作,例如调用 writeKeyValue 添加内容</p>
+<pre><code>public abstract class BeforeFilter implements SerializeFilter {
+   protected final void writeKeyValue(String key, Object value) { ... }
+    // 需要实现的抽象方法，在实现中调用writeKeyValue添加内容
+    public abstract void writeBefore(Object object);
+}
+</code></pre>
+<p><strong>6. AfterFilter 序列化时在最后添加内容</strong><br>
+在序列化对象的所有属性之后执行某些操作,例如调用 writeKeyValue 添加内容</p>
+<pre><code> public abstract class AfterFilter implements SerializeFilter {
+  protected final void writeKeyValue(String key, Object value) { ... }
+    // 需要实现的抽象方法，在实现中调用writeKeyValue添加内容
+    public abstract void writeAfter(Object object);
+}
+</code></pre>
+<h5 id="parseprocess">ParseProcess</h5>
+<p>ParseProcess是编程扩展定制反序列化的接口。fastjson支持如下ParseProcess：</p>
+<ul>
+<li>ExtraProcessor 用于处理多余的字段</li>
+<li>ExtraTypeProvider 用于处理多余字段时提供类型信息</li>
+</ul>
+<p><strong>1. 使用ExtraProcessor 处理多余字段</strong></p>
+<pre><code class="language-java">public static class VO {
+    private int id;
+    private Map&lt;String, Object&gt; attributes = new HashMap&lt;String, Object&gt;();
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id;}
+    public Map&lt;String, Object&gt; getAttributes() { return attributes;}
+}
+
+ExtraProcessor processor = new ExtraProcessor() {
+    public void processExtra(Object object, String key, Object value) {
+        VO vo = (VO) object;
+        vo.getAttributes().put(key, value);
+    }
+};
+
+VO vo = JSON.parseObject(&quot;{\&quot;id\&quot;:123,\&quot;name\&quot;:\&quot;abc\&quot;}&quot;, VO.class, processor);
+Assert.assertEquals(123, vo.getId());
+Assert.assertEquals(&quot;abc&quot;, vo.getAttributes().get(&quot;name&quot;));
+</code></pre>
+<p><strong>2. 使用ExtraTypeProvider 为多余的字段提供类型</strong></p>
+<pre><code class="language-java">public static class VO {
+    private int id;
+    private Map&lt;String, Object&gt; attributes = new HashMap&lt;String, Object&gt;();
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id;}
+    public Map&lt;String, Object&gt; getAttributes() { return attributes;}
+}
+
+class MyExtraProcessor implements ExtraProcessor, ExtraTypeProvider {
+    public void processExtra(Object object, String key, Object value) {
+        VO vo = (VO) object;
+        vo.getAttributes().put(key, value);
+    }
+
+    public Type getExtraType(Object object, String key) {
+        if (&quot;value&quot;.equals(key)) {
+            return int.class;
+        }
+        return null;
+    }
+};
+ExtraProcessor processor = new MyExtraProcessor();
+
+VO vo = JSON.parseObject(&quot;{\&quot;id\&quot;:123,\&quot;value\&quot;:\&quot;123456\&quot;}&quot;, VO.class, processor);
+Assert.assertEquals(123, vo.getId());
+Assert.assertEquals(123456, vo.getAttributes().get(&quot;value&quot;)); // value本应该是字符串类型的，通过getExtraType的处理变成Integer类型了。
+</code></pre>
+<h4 id="更多高级功能">更多高级功能</h4>
+<p>处理超大JSON文本，使用Stream API：https://github.com/alibaba/fastjson/wiki/Stream-api</p>
+<p>JSONPath介绍：https://github.com/alibaba/fastjson/wiki/JSONPath</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://alandelon.github.io/post/javatool-001-easyexcel/" class="post-title gt-a-link">
+                    Java解析excel工具easyexcel 助你快速简单避免OOM
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        京ICP备16061303号
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
