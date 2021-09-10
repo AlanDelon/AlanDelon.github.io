@@ -6,7 +6,7 @@
 
 <title>剖析Guava RateLimiter限流原理 | itsleuth</title>
 
-<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631251167276">
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631255596727">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
@@ -97,7 +97,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1631251167276"
+            <form id="gridea-search-form" style="position: relative" data-update="1631255596727"
                 action="/search/">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
@@ -133,7 +133,9 @@
                     
                 </div>
                 <div class="post-content">
-                    <h2 id="一-限流的基础算法">一、限流的基础算法</h2>
+                    <p>限流算法主要有三种：计数器算法、漏桶算法、令牌桶算法，其中漏桶算法和令牌桶算法最为重要。</p>
+<!-- more -->
+<h2 id="一-限流的基础算法">一、限流的基础算法</h2>
 <h4 id="11-漏桶算法">1.1 漏桶算法</h4>
 <p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9hc2sucWNsb3VkaW1nLmNvbS9odHRwLXNhdmUvMjU0MTc5NC83MG9nbjVoNWk4LnBuZw" alt="漏桶算法" loading="lazy"><br>
   如上图所示，假设有一个水桶，水桶有一定的容量，入水口不限速度将水全部注入到水桶中，然后水桶的出水口以一个恒定的速度将水放出，当入水口速度过大时，这个漏斗中就会积水，如果水太多了就会溢出。</p>

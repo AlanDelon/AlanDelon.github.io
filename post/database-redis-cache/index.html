@@ -6,7 +6,7 @@
 
 <title>Redis-持久化及内存淘汰机制 | itsleuth</title>
 
-<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631251167276">
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631255596727">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
@@ -97,7 +97,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1631251167276"
+            <form id="gridea-search-form" style="position: relative" data-update="1631255596727"
                 action="/search/">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
@@ -133,7 +133,9 @@
                     
                 </div>
                 <div class="post-content">
-                    <h2 id="一-持久化机制">一、持久化机制</h2>
+                    <p>Redis提供了两种持久化功能，RDB持久化、AOF（Append Only File）持久化功能；内存淘汰机制，Redis服务器实际使用的是惰性删除和定期删除两种策略。</p>
+<!-- more -->
+<h2 id="一-持久化机制">一、持久化机制</h2>
 <p>Redis是内存数据库，它将自己的数据库状态储存在内存里面，如果不想办法将储存在内存中的数据库状态保存到磁盘里面，那么一旦服务器进程退出，服务器中的数据库状态也会消失不见。为了解决这个问题，Redis提供了两种持久化功能，RDB持久化、AOF（Append Only File）持久化功能。</p>
 <h3 id="11-rdb持久化">1.1 RDB持久化</h3>
 <p><strong>命令：</strong> 使用SVAE 、BGSAVE命令可以生成RDB文件，将数据库状态存储到磁盘。</p>

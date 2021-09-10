@@ -6,7 +6,7 @@
 
 <title>Guava Cache缓存回收策略分析 | itsleuth</title>
 
-<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631251167276">
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631255596727">
 
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
@@ -97,7 +97,7 @@
             
         </div>
         <div style="text-align: center">
-            <form id="gridea-search-form" style="position: relative" data-update="1631251167276"
+            <form id="gridea-search-form" style="position: relative" data-update="1631255596727"
                 action="/search/">
                 <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
                 <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
@@ -133,7 +133,9 @@
                     
                 </div>
                 <div class="post-content">
-                    <h2 id="guava-cache简介">Guava Cache简介</h2>
+                    <p>缓存在很多场景下都是相当有用的。例如，计算或检索一个值的代价很高，并且对同样的输入需要不止一次获取值的时候，就应当考虑使用缓存。</p>
+<!-- more -->
+<h2 id="guava-cache简介">Guava Cache简介</h2>
 <h4 id="优点">优点</h4>
 <ol>
 <li>Guava Cache很好的封装了get、put操作。如：get数据时，获取缓存-如果没有-查询DB（get-if-absent-compute），再把查询结果放入缓存中</li>
