@@ -1,0 +1,544 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Guava Cache缓存回收策略分析 | itsleuth</title>
+
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631251167276">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-132765152-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', 'UA-132765152-1');
+</script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            itsleuth
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1631251167276"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Guava Cache缓存回收策略分析
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-07-12 ·
+                    </time>
+                    
+                        <a href="https://alandelon.github.io/tag/1gEkLlaQJO/" class="post-tags">
+                            # Java工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="guava-cache简介">Guava Cache简介</h2>
+<h4 id="优点">优点</h4>
+<ol>
+<li>Guava Cache很好的封装了get、put操作。如：get数据时，获取缓存-如果没有-查询DB（get-if-absent-compute），再把查询结果放入缓存中</li>
+<li>Guava Cache是线程安全的缓存，内部实现与ConcurrentMap相似，但增加了更多的元素失效策略。</li>
+<li>Guava Cache提供了三种基本的缓存回收方式：基于容量回收、定时回收和基于引用回收。定时回收有两种：按照写入时间，最早写入的最先回收；按照访问时间，最早访问的最早回收。</li>
+<li>Guava Cache提供了缓存加载命中情况的统计功能。</li>
+</ol>
+<h4 id="适用场景">适用场景</h4>
+<p>缓存在很多场景下都是相当有用的。例如，计算或检索一个值的代价很高，并且对同样的输入需要不止一次获取值的时候，就应当考虑使用缓存。<br>
+相对于频繁的IO操作，使用缓存效率更高速度更快；相对于Redis等分布式缓存，Guava Cache等本地缓存减少了网络传输的消耗。</p>
+<p>高效存储&amp;访问黄金搭档 = Guava Cache + Redis + DB</p>
+<p>Guava Cache适用于以下场景：</p>
+<ul>
+<li>你愿意消耗一些内存空间来提升速度。</li>
+<li>你预料到某些键会被查询一次以上。</li>
+<li>缓存中存放的数据总量不会超出内存容量。</li>
+</ul>
+<h4 id="基本用法">基本用法</h4>
+<ul>
+<li><strong>CacheLoader</strong> 提供合理的默认方法来加载或计算与键关联的值，从LoadingCache查询的正规方式是使用get(K)方法。这个方法要么返回已经缓存的值，要么使用CacheLoader向缓存原子地加载新值。</li>
+</ul>
+<pre><code>LoadingCache&lt;String, Integer&gt; cache = CacheBuilder.newBuilder()
+        .maximumSize(10)  // 最多存放10个数据
+        .expireAfterWrite(10, TimeUnit.SECONDS)  // 缓存10秒,从上一次数据更新开始计算
+        .expireAfterAccess(10, TimeUnit.SECONDS) // 缓存10秒,从上一次数据访问（读、写、更新）开始计算
+        .recordStats()   // 开启数据统计功能
+        .build(new CacheLoader&lt;String, Integer&gt;() {
+            // 数据加载，默认返回0，此处可自定义处理逻辑（如：查询DB）
+            @Override
+            public Integer load(String key) throws Exception {
+                return 0;
+            }
+        });
+
+@Test
+public void test() throws ExecutionException {
+    Integer value = cache.get(&quot;key&quot;);
+    System.out.println(value);
+}
+</code></pre>
+<ul>
+<li><strong>Callable</strong> 所有类型的Guava Cache，不管有没有自动加载功能，都支持get(K, Callable<V>)方法。这个方法返回缓存中相应的值，或者用给定的Callable运算并把结果加入到缓存中。</li>
+</ul>
+<pre><code>Cache&lt;String, Integer&gt; cache2 = CacheBuilder.newBuilder()
+        .maximumSize(10)
+        .build();
+cache2.get(&quot;test&quot;, new Callable&lt;Integer&gt;() {
+    @Override
+    public Integer call() throws Exception {
+        // 这里可以做一些复杂的操作，或者针对不同key进行不同的操作
+        return 0;
+    }
+});
+</code></pre>
+<ul>
+<li><strong>Cache.put</strong>使用cache.put(key, value)方法可以直接向缓存中插入值，这会直接覆盖掉给定键之前映射的值。</li>
+</ul>
+<h2 id="缓存回收">缓存回收</h2>
+<h4 id="基于容量的回收">基于容量的回收</h4>
+<ul>
+<li>如果要规定缓存项的数目不超过固定值，只需使用CacheBuilder.maximumSize(long)。缓存将尝试回收最近没有使用或总体上很少使用的缓存项<br>
+<strong>注：采用LRU算法回收缓存</strong></li>
+</ul>
+<h4 id="定时回收">定时回收</h4>
+<ul>
+<li>expireAfterAccess(long, TimeUnit)：缓存项在给定时间内没有被读/写访问，则回收。请注意这种缓存的回收顺序和基于大小回收一样。</li>
+<li>expireAfterWrite(long, TimeUnit)：缓存项在给定时间内没有被写访问（创建或覆盖），则回收。如果认为缓存数据总是在固定时候后变得陈旧不可用，这种回收方式是可取的。</li>
+</ul>
+<p><strong>注：使用CacheBuilder构建的缓存不会&quot;自动&quot;执行清理和回收工作，也不会在某个缓存项过期后马上清理，也没有诸如此类的清理机制。相反，它会在写操作时顺带做少量的维护工作，或者偶尔在读操作时做（如果写操作实在太少）</strong></p>
+<h4 id="基于引用的回收">基于引用的回收</h4>
+<ul>
+<li>CacheBuilder.weakKeys()：使用弱引用存储键。当键没有其它（强或软）引用时，缓存项可以被垃圾回收。</li>
+<li>CacheBuilder.weakValues()：使用弱引用存储值。当值没有其它（强或软）引用时，缓存项可以被垃圾回收。</li>
+<li>CacheBuilder.softValues()：使用软引用存储值。软引用只有在响应内存需要时，才按照全局最近最少使用的顺序回收。</li>
+</ul>
+<h4 id="显示清除">显示清除</h4>
+<ul>
+<li>个别清除：Cache.invalidate(key)</li>
+<li>批量清除：Cache.invalidateAll(keys)</li>
+<li>清除所有缓存项：Cache.invalidateAll()</li>
+</ul>
+<h4 id="数据结构">数据结构</h4>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20191208222309103.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ppYW5namlhbmRlY3Nk,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h2 id="缓存回收策略实现">缓存回收策略实现</h2>
+<p>GuavaCache会维护两个队列，一个writeQueue、一个accessQueue，用这两个队列来实现最近读和最近写的清除操作。AccessQueue的实现如下：</p>
+<pre><code>static final class AccessQueue&lt;K, V&gt; extends AbstractQueue&lt;ReferenceEntry&lt;K, V&gt;&gt; {
+   
+    // implements Queue
+    
+    @Override
+    public boolean offer(ReferenceEntry&lt;K, V&gt; entry) {
+      // unlink
+      // 将entry和它的前节点后节点的关联断开
+      connectAccessOrder(entry.getPreviousInAccessQueue(), entry.getNextInAccessQueue());
+
+      // add to tail
+      // 将新增节点加入到队列的尾部
+      connectAccessOrder(head.getPreviousInAccessQueue(), entry);
+      // entry的后节点设置为head
+      connectAccessOrder(entry, head);
+
+      return true;
+    }
+
+    @Override
+    public ReferenceEntry&lt;K, V&gt; peek() {
+      ReferenceEntry&lt;K, V&gt; next = head.getNextInAccessQueue();
+      return (next == head) ? null : next;
+    }
+
+    @Override
+    public ReferenceEntry&lt;K, V&gt; poll() {
+      ReferenceEntry&lt;K, V&gt; next = head.getNextInAccessQueue();
+      if (next == head) {
+        return null;
+      }
+
+      remove(next);
+      return next;
+    }
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public boolean remove(Object o) {
+      ReferenceEntry&lt;K, V&gt; e = (ReferenceEntry) o;
+      ReferenceEntry&lt;K, V&gt; previous = e.getPreviousInAccessQueue();
+      ReferenceEntry&lt;K, V&gt; next = e.getNextInAccessQueue();
+      connectAccessOrder(previous, next);
+      nullifyAccessOrder(e);
+
+      return next != NullEntry.INSTANCE;
+    }
+  }
+
+</code></pre>
+<p>AccessQueue重写了队列的offer 、 poll 、 peek等操作。重点关注offer()实现：</p>
+<ol>
+<li>将entry和它的前节点后节点的关联断开，并且建立前节点与后节点直接的关联。</li>
+<li>将新增entry节点加入到队列的尾部。head节点的前一个节点即尾节点。</li>
+<li>建立尾节点与entry节点的关系，entry的后节点设置为head<br>
+如上代码中的offer操作，可以发现，AccessQueue是一个环形队列，最近更新的节点一定是在尾部的，head后面的节点一定是最不活跃的，在每一次回收数据时首先清除head后面的节点数据。</li>
+</ol>
+<p>缓存设置了最大数量清除策略CacheBuilder.maximumSize(long)，会触发如下代码：<br>
+根据权重计算数量，权重可自定义实现，默认1个缓存项的权重是1，当权重超过设置的最大值则进行缓存清除。。</p>
+<pre><code>    @GuardedBy(&quot;this&quot;)
+    void evictEntries(ReferenceEntry&lt;K, V&gt; newest) {
+      if (!map.evictsBySize()) {
+        return;
+      }
+
+      drainRecencyQueue();
+
+      // If the newest entry by itself is too heavy for the segment, don't bother evicting
+      // anything else, just that
+      if (newest.getValueReference().getWeight() &gt; maxSegmentWeight) {
+        if (!removeEntry(newest, newest.getHash(), RemovalCause.SIZE)) {
+          throw new AssertionError();
+        }
+      }
+
+      while (totalWeight &gt; maxSegmentWeight) {
+        ReferenceEntry&lt;K, V&gt; e = getNextEvictable();
+        if (!removeEntry(e, e.getHash(), RemovalCause.SIZE)) {
+          throw new AssertionError();
+        }
+      }
+    }
+
+    // 从accessQueue获取下一个应该被清理的对象
+    @GuardedBy(&quot;this&quot;)
+    ReferenceEntry&lt;K, V&gt; getNextEvictable() {
+      for (ReferenceEntry&lt;K, V&gt; e : accessQueue) {
+        int weight = e.getValueReference().getWeight();
+        if (weight &gt; 0) {
+          return e;
+        }
+      }
+      throw new AssertionError();
+    }
+</code></pre>
+<p>每次写操作之前都会触发preWriteCleanup清理操作，如下：</p>
+<pre><code>    @GuardedBy(&quot;this&quot;)
+    // 写操作之前执行清理操作
+    void preWriteCleanup(long now) {
+      runLockedCleanup(now);
+    }
+
+    // 清理之前，先进行锁定
+    void runLockedCleanup(long now) {
+      if (tryLock()) {
+        try {
+          // 清理弱引用已经被回收的key value数据
+          drainReferenceQueues();
+          // 清理已经过期的数据
+          expireEntries(now); // calls drainRecencyQueue
+          readCount.set(0);
+        } finally {
+          unlock();
+        }
+      }
+    }
+
+    /**
+     * Drain the key and value reference queues, cleaning up internal entries containing garbage
+     * collected keys or values.
+     */
+    @GuardedBy(&quot;this&quot;)
+    void drainReferenceQueues() {
+      if (map.usesKeyReferences()) {
+        // 清理弱引用key
+        drainKeyReferenceQueue();
+      }
+      if (map.usesValueReferences()) {
+        // 清理弱引用value
+        drainValueReferenceQueue();
+      }
+    }
+
+    @GuardedBy(&quot;this&quot;)
+    void drainKeyReferenceQueue() {
+      Reference&lt;? extends K&gt; ref;
+      int i = 0;
+      while ((ref = keyReferenceQueue.poll()) != null) {
+        @SuppressWarnings(&quot;unchecked&quot;)
+        ReferenceEntry&lt;K, V&gt; entry = (ReferenceEntry&lt;K, V&gt;) ref;
+        map.reclaimKey(entry);
+        if (++i == DRAIN_MAX) {
+          break;
+        }
+      }
+    }
+
+    @GuardedBy(&quot;this&quot;)
+    void drainValueReferenceQueue() {
+      Reference&lt;? extends V&gt; ref;
+      int i = 0;
+      while ((ref = valueReferenceQueue.poll()) != null) {
+        @SuppressWarnings(&quot;unchecked&quot;)
+        ValueReference&lt;K, V&gt; valueReference = (ValueReference&lt;K, V&gt;) ref;
+        map.reclaimValue(valueReference);
+        if (++i == DRAIN_MAX) {
+          break;
+        }
+      }
+    }
+</code></pre>
+<p>定时回收策略，首先读写操作时都会把对应的entry加入到accessQueue 、 writeQueue两个队列。</p>
+<pre><code>      if (map.recordsAccess()) {
+        entry.setAccessTime(now);
+      }
+      if (map.recordsWrite()) {
+        entry.setWriteTime(now);
+      }
+      accessQueue.add(entry);
+      writeQueue.add(entry);
+</code></pre>
+<p>过期操作时遍历accessQueue 、 writeQueue两个队列，判断已经过期则执行removeEntry操作</p>
+<pre><code>    @GuardedBy(&quot;this&quot;)
+    void expireEntries(long now) {
+      drainRecencyQueue();
+
+      ReferenceEntry&lt;K, V&gt; e;
+      while ((e = writeQueue.peek()) != null &amp;&amp; map.isExpired(e, now)) {
+        if (!removeEntry(e, e.getHash(), RemovalCause.EXPIRED)) {
+          throw new AssertionError();
+        }
+      }
+      while ((e = accessQueue.peek()) != null &amp;&amp; map.isExpired(e, now)) {
+        if (!removeEntry(e, e.getHash(), RemovalCause.EXPIRED)) {
+          throw new AssertionError();
+        }
+      }
+    }
+</code></pre>
+<p>根据设置的expireAfterAccess() expireAfterWrite()来判断是否过期</p>
+<pre><code>  /**
+   * Returns true if the entry has expired.
+   */
+  boolean isExpired(ReferenceEntry&lt;K, V&gt; entry, long now) {
+    checkNotNull(entry);
+    if (expiresAfterAccess()
+        &amp;&amp; (now - entry.getAccessTime() &gt;= expireAfterAccessNanos)) {
+      return true;
+    }
+    if (expiresAfterWrite()
+        &amp;&amp; (now - entry.getWriteTime() &gt;= expireAfterWriteNanos)) {
+      return true;
+    }
+    return false;
+  }
+</code></pre>
+<p>所有缓存过期的清理策略正常是在写操作之前进行的，但是防止很久时间没有写操作，偶尔在读的时候执行清理策略，如下读的finally执行postReadCleanup()</p>
+<pre><code>    V get(K key, int hash, CacheLoader&lt;? super K, V&gt; loader) throws ExecutionException {
+      checkNotNull(key);
+      checkNotNull(loader);
+      try {
+        if (count != 0) { // read-volatile
+          // don't call getLiveEntry, which would ignore loading values
+          ReferenceEntry&lt;K, V&gt; e = getEntry(key, hash);
+          if (e != null) {
+            long now = map.ticker.read();
+            // 获取有效的没有过期的值
+            V value = getLiveValue(e, now);
+            if (value != null) {
+              recordRead(e, now);
+              statsCounter.recordHits(1);
+              // refresh的逻辑
+              return scheduleRefresh(e, key, hash, value, now, loader);
+            }
+            ValueReference&lt;K, V&gt; valueReference = e.getValueReference();
+            if (valueReference.isLoading()) {
+              // 已经有一个线程在load，同步等待返回的新值
+              return waitForLoadingValue(e, key, valueReference);
+            }
+          }
+        }
+
+        // at this point e is either null or expired;
+        return lockedGetOrLoad(key, hash, loader);
+      } catch (ExecutionException ee) {
+        Throwable cause = ee.getCause();
+        if (cause instanceof Error) {
+          throw new ExecutionError((Error) cause);
+        } else if (cause instanceof RuntimeException) {
+          throw new UncheckedExecutionException(cause);
+        }
+        throw ee;
+      } finally {
+        postReadCleanup();
+      }
+    }
+
+    /**
+     * Performs routine cleanup following a read. Normally cleanup happens during writes. If cleanup
+     * is not observed after a sufficient number of reads, try cleaning up from the read thread.
+     */
+    void postReadCleanup() {
+      // DRAIN_THRESHOD = 0x3f  也就是应该读192次触发一次清理，单个segment中
+      if ((readCount.incrementAndGet() &amp; DRAIN_THRESHOLD) == 0) {
+        cleanUp();
+      }
+    }
+</code></pre>
+<p>注意上面的scheduleRefresh()方法，这个方法的实现决定了expireAfterWrite和refreshAfterWrite两种过期策略的区别。<br>
+两个策略都能保证在本地缓存过期时，只有一个线程去穿透缓存加载后端资源。区别是在加载资源时expireAfterWrite会让所有的线程阻塞等待新值返回,然后返回加载好的新值；而refreshAfterWrite在一个线程去拿新值的同时，其他线程先直接返回旧值，不阻塞。</p>
+<pre><code>    V scheduleRefresh(ReferenceEntry&lt;K, V&gt; entry, K key, int hash, V oldValue, long now,
+        CacheLoader&lt;? super K, V&gt; loader) {
+      if (map.refreshes() &amp;&amp; (now - entry.getWriteTime() &gt; map.refreshNanos)
+          &amp;&amp; !entry.getValueReference().isLoading()) {
+        // 如果没有线程在load则去加载，如果已经在load则返回旧值
+        V newValue = refresh(key, hash, loader, true);
+        if (newValue != null) {
+          return newValue;
+        }
+      }
+      return oldValue;
+    }
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://alandelon.github.io/post/javatool-guava-limit/" class="post-title gt-a-link">
+                    剖析Guava RateLimiter限流原理
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        京ICP备16061303号
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

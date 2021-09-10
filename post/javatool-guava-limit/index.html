@@ -1,0 +1,433 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>剖析Guava RateLimiter限流原理 | itsleuth</title>
+
+<link rel="shortcut icon" href="https://alandelon.github.io/favicon.ico?v=1631251167276">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://alandelon.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-132765152-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+    gtag('config', 'UA-132765152-1');
+</script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            itsleuth
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1631251167276"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    剖析Guava RateLimiter限流原理
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-07-10 ·
+                    </time>
+                    
+                        <a href="https://alandelon.github.io/tag/1gEkLlaQJO/" class="post-tags">
+                            # Java工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="一-限流的基础算法">一、限流的基础算法</h2>
+<h4 id="11-漏桶算法">1.1 漏桶算法</h4>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9hc2sucWNsb3VkaW1nLmNvbS9odHRwLXNhdmUvMjU0MTc5NC83MG9nbjVoNWk4LnBuZw" alt="漏桶算法" loading="lazy"><br>
+  如上图所示，假设有一个水桶，水桶有一定的容量，入水口不限速度将水全部注入到水桶中，然后水桶的出水口以一个恒定的速度将水放出，当入水口速度过大时，这个漏斗中就会积水，如果水太多了就会溢出。</p>
+<p>优点：平滑突发请求，削减峰值<br>
+缺点：漏出的速度可能会拖慢整个系统，不能有效地利用系统的资源</p>
+<h4 id="12-令牌桶算法">1.2 令牌桶算法</h4>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cHM6Ly9hc2sucWNsb3VkaW1nLmNvbS9odHRwLXNhdmUvMjU0MTc5NC9ubTd0ZDhlZDdnLnBuZw" alt="令牌桶算法示意图" loading="lazy"><br>
+  如上图所示，令牌桶算法是一个存放固定容量令牌的桶，按照固定速率往桶里添加令牌。桶中存放的令牌数有最大上限，超出之后就被丢弃或者拒绝。当流量或者网络请求到达时，每个请求都要获取一个令牌，如果能够获取到，则直接处理，并且令牌桶删除一个令牌。如果获取不同，该请求就要被限流，要么直接丢弃，要么在缓冲区等待。</p>
+<p>优点：相比漏桶算法，令牌桶算法允许一定的突发流量，但是又不会让突发流量超过我们给定的限制（单位时间窗口内的令牌数）。</p>
+<h2 id="二-ratelimiter限流原理">二、RateLimiter限流原理</h2>
+<p>  Google开源工具包Guava的RateLimiter提供了令牌桶算法实现，包含平滑突发限流(SmoothBursty)和平滑预热限流(SmoothWarmingUp)。</p>
+<h4 id="21-ratelimiter使用示例">2.1 RateLimiter使用示例</h4>
+<p>  首先通过RateLimiter.create(5)；创建一个限流器，参数代表每秒生成的令牌数，通过limiter.acquire(i)以阻塞的方式获取令牌。<br>
+  RateLimiter对象可以保证1秒内不会给超过5个令牌，并且以固定速率进行放置，达到平滑输出的效果。</p>
+<pre><code>public void testBurstyLimiter1() {
+        RateLimiter limiter = RateLimiter.create(5);
+        while (true) {
+            System.out.println(&quot;get 1 tokens: &quot; + limiter.acquire() + &quot;s&quot;);
+        }
+    }
+</code></pre>
+<p>输出结果：</p>
+<pre><code> get 1 tokens: 0.0s
+ get 1 tokens: 0.190636s
+ get 1 tokens: 0.193058s
+ get 1 tokens: 0.195473s
+ get 1 tokens: 0.189132s
+ get 1 tokens: 0.197889s
+ get 1 tokens: 0.197371s
+ get 1 tokens: 0.197741s
+ get 1 tokens: 0.198837s
+ get 1 tokens: 0.195929s
+</code></pre>
+<p>  RateLimiter使用令牌桶算法，会进行令牌的累积，如果获取令牌的频率比较低，则不会导致等待，直接获取令牌。<br>
+  RateLimiter在没有足够令牌发放时，采用滞后处理的方式，也就是前一个请求获取令牌所需等待的时间由下一次请求来进行等待。</p>
+<pre><code>public void testBurstyLimiter2() {
+        RateLimiter limiter = RateLimiter.create(2);
+        while (true) {
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {}
+            System.out.println(&quot;get 1 tokens: &quot; + limiter.acquire(1) + &quot;s&quot;);
+            System.out.println(&quot;get 1 tokens: &quot; + limiter.acquire(1) + &quot;s&quot;);
+            System.out.println(&quot;get 1 tokens: &quot; + limiter.acquire(1) + &quot;s&quot;);
+            System.out.println(&quot;get 1 tokens: &quot; + limiter.acquire(1) + &quot;s&quot;);
+            System.out.println(&quot;end&quot;);
+        }
+    }
+</code></pre>
+<p>输出结果：</p>
+<pre><code>get 1 tokens: 0.0s
+get 1 tokens: 0.0s
+get 1 tokens: 0.0s
+get 1 tokens: 0.494773s
+end
+get 1 tokens: 0.0s
+get 1 tokens: 0.0s
+get 1 tokens: 0.0s
+get 1 tokens: 0.499717s
+end
+</code></pre>
+<h4 id="22-ratelimiter实现原理">2.2 RateLimiter实现原理</h4>
+<p>  了解RateLimiter的基本使用方法后，我们来学习一下它的实现原理，首先来看一下类图。<br>
+<img src="https://img-blog.csdnimg.cn/20190804144453532.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ppYW5namlhbmRlY3Nk,size_16,color_FFFFFF,t_70" alt="类图" loading="lazy"></p>
+<p>  RateLimiter是入口类，它提供了两套工厂方法来创建出两个子类。工厂方法会调用下面两个函数，生成RateLimiter的两个子类。</p>
+<pre><code>  static RateLimiter create(SleepingStopwatch stopwatch, double permitsPerSecond) {
+    RateLimiter rateLimiter = new SmoothBursty(stopwatch, 1.0 /* maxBurstSeconds */);
+    rateLimiter.setRate(permitsPerSecond);
+    return rateLimiter;
+  }
+  
+  static RateLimiter create(
+      SleepingStopwatch stopwatch, double permitsPerSecond, long warmupPeriod, TimeUnit unit,
+      double coldFactor) {
+    RateLimiter rateLimiter = new SmoothWarmingUp(stopwatch, warmupPeriod, unit, coldFactor);
+    rateLimiter.setRate(permitsPerSecond);
+    return rateLimiter;
+  }
+</code></pre>
+<p>RateLimiter几个重要的成员变量含义：</p>
+<pre><code>  /**
+   * The currently stored permits.
+   * 当前存储令牌数
+   */
+  double storedPermits;
+
+  /**
+   * The maximum number of stored permits.
+   * 最大可存储令牌数
+   */
+  double maxPermits;
+
+  /**
+   * The interval between two unit requests, at our stable rate. E.g., a stable rate of 5 permits
+   * per second has a stable interval of 200ms.
+   * 添加令牌时间间隔（微秒）
+   */
+  double stableIntervalMicros;
+
+  /**
+   * The time when the next request (no matter its size) will be granted. After granting a
+   * request, this is pushed further in the future. Large requests push this further than small
+   * requests.
+   * 下一次请求可以获取令牌的起始时间
+   */
+  private long nextFreeTicketMicros = 0L; // could be either in the past or future
+
+</code></pre>
+<p>  前面咱们了解过令牌桶算法原理，桶中的令牌是持续生成存放的，有请求到来时需要先从桶中拿到令牌才能开始执行，怎么持续生成令牌并放入桶中呢？<br>
+  我们一般最容易想到的就是开启一个定时任务，由定时任务持续生成令牌并放入桶中。但是这样的问题在于会极大的消耗系统资源，如某秒杀接口需要分别对每个用户做访问频率限制，那就需要每个用户开启一个定时任务，这样的开销是系统不能承受的。</p>
+<p>  RateLimiter采用的是延迟计算，等到需要拿令牌的时候再去更新桶中的令牌数量。原理就是每次调用acquire时用当前时间和nextFreeTicketMicros进行比较，根据二者的间隔和添加单位令牌的时间间隔stableIntervalMicros来刷新存储令牌数storedPermits。然后acquire会进行休眠，直到nextFreeTicketMicros，如果nextFreeTicketMicros是过去的时间则直接返回。</p>
+<p>acquire函数实现如下：</p>
+<ol>
+<li>调用reserve函数预定指定数量的令牌，并返回所需等待时间</li>
+<li>使用SleepStopwatch进行休眠</li>
+<li>等待时间转换为秒并返回</li>
+</ol>
+<pre><code>  public double acquire(int permits) {
+    // 计算获取令牌需等待的时间
+    long microsToWait = reserve(permits);
+    // 线程sleep
+    stopwatch.sleepMicrosUninterruptibly(microsToWait);
+    // 等待时间转换为秒并返回
+    return 1.0 * microsToWait / SECONDS.toMicros(1L);
+  }
+  
+  final long reserve(int permits) {
+    checkPermits(permits);
+    synchronized (mutex()) {
+      return reserveAndGetWaitLength(permits, stopwatch.readMicros());
+    }
+  }
+  
+  final long reserveAndGetWaitLength(int permits, long nowMicros) {
+    // 预定请求令牌数量，并返回令牌可使用的时间
+    long momentAvailable = reserveEarliestAvailable(permits, nowMicros);
+    // 两个时间相减，获得需要等待的时间
+    return max(momentAvailable - nowMicros, 0);
+  }
+</code></pre>
+<p>reserveEarliestAvailable是更新存储令牌数和下次获取令牌起始时间的关键函数，分为一下几步：</p>
+<ol>
+<li>调用resync函数更新存储令牌数</li>
+<li>计算预支付令牌所需等待的时间</li>
+<li>更新下次获取令牌时间nextFreeTicketMicros并扣除本次消耗令牌数</li>
+</ol>
+<pre><code>  final long reserveEarliestAvailable(int requiredPermits, long nowMicros) {
+    // 根据时间刷新令牌数
+    resync(nowMicros);
+    // 等待时间为上一次更新的允许获取令牌起始时间
+    long returnValue = nextFreeTicketMicros;
+    // 当前存储令牌数和目标令牌数进行比较，算出可以目前即可得到的令牌数
+    double storedPermitsToSpend = min(requiredPermits, this.storedPermits);
+    // 预支令牌数 = 目标令牌数 - 目前即可得到的令牌数
+    double freshPermits = requiredPermits - storedPermitsToSpend;
+    // 获取目标令牌数等待时间，存储令牌中拿目前即可得令牌需要时间加上预支付令牌等待时间
+    long waitMicros = storedPermitsToWaitTime(this.storedPermits, storedPermitsToSpend)
+        + (long) (freshPermits * stableIntervalMicros);
+
+    try {
+      // 更新nextFreeTicketMicros,预先支付令牌等待的时间让下一次请求来实际等待
+      this.nextFreeTicketMicros = LongMath.checkedAdd(nextFreeTicketMicros, waitMicros);
+    } catch (ArithmeticException e) {
+      this.nextFreeTicketMicros = Long.MAX_VALUE;
+    }
+    // 更新当前存储令牌数
+    this.storedPermits -= storedPermitsToSpend;
+    return returnValue;
+  }
+
+  void resync(long nowMicros) {
+    // nextFreeTicketMicros早于当前时间nowMicros，同步为当前时间，并刷新存储令牌数
+    if (nowMicros &gt; nextFreeTicketMicros) {
+      // coolDownIntervalMicros函数获取生成令牌时间间隔
+      storedPermits = min(maxPermits,
+          storedPermits
+            + (nowMicros - nextFreeTicketMicros) / coolDownIntervalMicros());
+      nextFreeTicketMicros = nowMicros;
+    }
+  }
+  
+  // SmoothBursty
+  double coolDownIntervalMicros() {
+    return stableIntervalMicros;
+  }
+  
+  // SmoothBursty
+  long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
+    return 0L;
+  }
+</code></pre>
+<p>上面是平滑突发限流的实现，下面看一下加上预热缓冲期的实现原理。</p>
+<pre><code>   *
+   *          ^ throttling
+   *          |
+   *    cold  +                  /
+   * interval |                 /.
+   *          |                / .
+   *          |               /  .   &lt;-- &quot;warmup period&quot; is the area of the trapezoid between
+   *          |              /   .       thresholdPermits and maxPermits
+   *          |             /    .
+   *          |            /     .
+   *          |           /      .
+   *   stable +----------/  WARM .
+   * interval |          .   UP  .
+   *          |          . PERIOD.
+   *          |          .       .
+   *        0 +----------+-------+--------------&gt; storedPermits
+   *          0 thresholdPermits maxPermits
+</code></pre>
+<p>  SmoothWarmingUp在初始阶段与SmoothBursty有点不同，SmoothWarmingUp初始storePermits = maxPermits。如上图所示，从右至左分发令牌的速率会先慢后快，一直使用permits直至storePermits减少到thresholdPermits放入token的时间便稳定下来，到达了“热状态”，之后令牌消费和SmoothBursty一样。</p>
+<p>SmoothWarmingUp计算消耗令牌等待时间的代码如下：</p>
+<pre><code>    // SmoothWarmingUp计算等待时间就是计算上图中梯形或者矩形的面积。
+    long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
+      // 当前存储令牌数超出阈值的部分
+      double availablePermitsAboveThreshold = storedPermits - thresholdPermits;
+      long micros = 0;
+      // 如果当前存储的令牌数超出阈值thresholdPermits
+      if (availablePermitsAboveThreshold &gt; 0.0) {
+        // 阈值右侧需被消耗的令牌数
+        double permitsAboveThresholdToTake = min(availablePermitsAboveThreshold, permitsToTake);
+		/**
+		 * 阈值右侧被消耗令牌数需等待时间 = 梯形面积
+		 *
+		 * 高是 permitsAboveThresholdToTake 即右侧需要消费的令牌数
+		 * 底是 permitsToTime(availablePermitsAboveThreshold)
+		 * 顶是 permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake)
+		 */
+        micros = (long) (permitsAboveThresholdToTake
+            * (permitsToTime(availablePermitsAboveThreshold)
+            + permitsToTime(availablePermitsAboveThreshold - permitsAboveThresholdToTake)) / 2.0);
+        permitsToTake -= permitsAboveThresholdToTake;
+      }
+      // 稳定时消耗令牌等待时间
+      micros += (stableIntervalMicros * permitsToTake);
+      return micros;
+    }
+
+    private double permitsToTime(double permits) {
+      return stableIntervalMicros + permits * slope;
+    }
+
+    double coolDownIntervalMicros() {
+      // warmuptime时间内增长的令牌数为maxPermits
+      return warmupPeriodMicros / maxPermits;
+    }
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://alandelon.github.io/post/javatool-gson/" class="post-title gt-a-link">
+                    JSON常用类库介绍（二）
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        京ICP备16061303号
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
