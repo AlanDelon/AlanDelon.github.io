@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://alandelon.github.io</id>
+    <id>https://alandelon.github.io</id>
     <title>itsleuth</title>
-    <updated>2021-09-10T07:43:55.748Z</updated>
+    <updated>2021-09-10T08:01:23.948Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="http://alandelon.github.io"/>
-    <link rel="self" href="http://alandelon.github.io/atom.xml"/>
+    <link rel="alternate" href="https://alandelon.github.io"/>
+    <link rel="self" href="https://alandelon.github.io/atom.xml"/>
     <subtitle>永远不要放弃你真正想要的东西。等待虽难，但后悔更甚。</subtitle>
-    <logo>http://alandelon.github.io/images/avatar.png</logo>
-    <icon>http://alandelon.github.io/favicon.ico</icon>
+    <logo>https://alandelon.github.io/images/avatar.png</logo>
+    <icon>https://alandelon.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, itsleuth</rights>
     <entry>
         <title type="html"><![CDATA[Redis-持久化及内存淘汰机制]]></title>
-        <id>http://alandelon.github.io/post/database-redis-cache/</id>
-        <link href="http://alandelon.github.io/post/database-redis-cache/">
+        <id>https://alandelon.github.io/post/database-redis-cache/</id>
+        <link href="https://alandelon.github.io/post/database-redis-cache/">
         </link>
         <updated>2020-07-19T05:03:44.000Z</updated>
         <summary type="html"><![CDATA[<p>Redis提供了两种持久化功能，RDB持久化、AOF（Append Only File）持久化功能；内存淘汰机制，Redis服务器实际使用的是惰性删除和定期删除两种策略。</p>
@@ -149,8 +149,8 @@ noeviction -&gt; 当内存使用超过配置的时候会返回错误，不会驱
     </entry>
     <entry>
         <title type="html"><![CDATA[Guava Cache缓存回收策略分析]]></title>
-        <id>http://alandelon.github.io/post/javatool-guava-cache/</id>
-        <link href="http://alandelon.github.io/post/javatool-guava-cache/">
+        <id>https://alandelon.github.io/post/javatool-guava-cache/</id>
+        <link href="https://alandelon.github.io/post/javatool-guava-cache/">
         </link>
         <updated>2020-07-12T05:01:48.000Z</updated>
         <summary type="html"><![CDATA[<p>缓存在很多场景下都是相当有用的。例如，计算或检索一个值的代价很高，并且对同样的输入需要不止一次获取值的时候，就应当考虑使用缓存。</p>
@@ -520,8 +520,8 @@ cache2.get(&quot;test&quot;, new Callable&lt;Integer&gt;() {
     </entry>
     <entry>
         <title type="html"><![CDATA[剖析Guava RateLimiter限流原理]]></title>
-        <id>http://alandelon.github.io/post/javatool-guava-limit/</id>
-        <link href="http://alandelon.github.io/post/javatool-guava-limit/">
+        <id>https://alandelon.github.io/post/javatool-guava-limit/</id>
+        <link href="https://alandelon.github.io/post/javatool-guava-limit/">
         </link>
         <updated>2020-07-10T04:55:58.000Z</updated>
         <summary type="html"><![CDATA[<p>限流算法主要有三种：计数器算法、漏桶算法、令牌桶算法，其中漏桶算法和令牌桶算法最为重要。</p>
@@ -780,8 +780,8 @@ end
     </entry>
     <entry>
         <title type="html"><![CDATA[JSON常用类库介绍（二）]]></title>
-        <id>http://alandelon.github.io/post/javatool-gson/</id>
-        <link href="http://alandelon.github.io/post/javatool-gson/">
+        <id>https://alandelon.github.io/post/javatool-gson/</id>
+        <link href="https://alandelon.github.io/post/javatool-gson/">
         </link>
         <updated>2019-03-20T05:10:58.000Z</updated>
         <summary type="html"><![CDATA[<p>Gson（又称Google Gson）是Google公司发布的一个开放源代码的Java库，主要用途为序列化Java对象为JSON字符串，或反序列化JSON字符串成Java对象。</p>
@@ -1122,8 +1122,8 @@ public void testToJson() {
     </entry>
     <entry>
         <title type="html"><![CDATA[JSON常用类库介绍（一）]]></title>
-        <id>http://alandelon.github.io/post/javatool-fastjson/</id>
-        <link href="http://alandelon.github.io/post/javatool-fastjson/">
+        <id>https://alandelon.github.io/post/javatool-fastjson/</id>
+        <link href="https://alandelon.github.io/post/javatool-fastjson/">
         </link>
         <updated>2019-03-13T05:09:47.000Z</updated>
         <summary type="html"><![CDATA[<p>JSON是一种文本方式展示结构化数据的方式，从产生开始就由于其简单好用、跨平台，特别适合HTTP下数据的传输（例如现在很流行的REST）而被广泛使用。</p>
@@ -1498,8 +1498,8 @@ Assert.assertEquals(123456, vo.getAttributes().get(&quot;value&quot;)); // value
     </entry>
     <entry>
         <title type="html"><![CDATA[Java解析excel工具easyexcel 助你快速简单避免OOM]]></title>
-        <id>http://alandelon.github.io/post/javatool-001-easyexcel/</id>
-        <link href="http://alandelon.github.io/post/javatool-001-easyexcel/">
+        <id>https://alandelon.github.io/post/javatool-001-easyexcel/</id>
+        <link href="https://alandelon.github.io/post/javatool-001-easyexcel/">
         </link>
         <updated>2018-02-12T03:36:26.000Z</updated>
         <summary type="html"><![CDATA[<p>Java解析、生成Excel比较有名的框架有Apache poi、jxl。但他们都存在一个严重的问题就是非常的耗内存，poi有一套SAX模式的API可以一定程度的解决一些内存溢出的问题，但POI还是有一些缺陷，比如07版Excel解压缩以及解压后存储都是在内存中完成的，内存消耗依然很大。easyexcel重写了poi对07版Excel的解析，能够原本一个3M的excel用POI sax依然需要100M左右内存降低到KB级别，并且再大的excel不会出现内存溢出，03版依赖POI的sax模式。在上层做了模型转换的封装，让使用者更加简单方便</p>
